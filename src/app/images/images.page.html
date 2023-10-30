@@ -18,6 +18,13 @@
     <ion-button (click)="submitAllImages()" class="w-75">Submit Images</ion-button>
   </div>
 
+  <div *ngIf="uploadSucces" class="px-2">
+    <span class="font-bold">Upload Size: </span><span>{{len}}</span><br/>
+    <span class="font-bold">Upload Status: </span><span>{{uploadData.success ? 'Successful' : 'Fail'}}</span><br/>
+    <span class="font-bold">Upload Response Code: </span><span>{{uploadData.responseCode}}</span><br/>
+    <span class="font-bold">Upload Message: </span><span>{{uploadData.message}}</span><br/>
+  </div>
+
   <!-- <form [formGroup]="imageForm" (ngSubmit)="submitAllImages($event)">
     <ion-list>
       <ion-item>

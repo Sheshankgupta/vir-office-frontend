@@ -1,5 +1,5 @@
 export interface Success {
   data: any,
-  success: boolean,
+  success?: boolean,
   responseCode?: string | number
 }

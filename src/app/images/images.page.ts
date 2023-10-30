@@ -4,6 +4,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { Camera, CameraResultType } from '@capacitor/camera';
 import { HttpClient } from '@angular/common/http';
 import { Success } from '../models/success';
+import { ToastController } from '@ionic/angular';
 
 
 @Component({
@@ -17,8 +18,11 @@ export class ImagesPage implements OnInit {
   selectedImages: any = [];
   isImageModalOpen: boolean = false;
   isPreviewModalOpen: boolean = false;
+  uploadSucces: boolean = false;
+  len: number = 0;
+  uploadData: any;
 
-  constructor(private formBuilder: FormBuilder, private imgUpl: ImageUploadService, private http: HttpClient) {
+  constructor(private formBuilder: FormBuilder, private imgUpl: ImageUploadService, private http: HttpClient, private toastCtrl: ToastController) {
     this.imageForm = this.formBuilder.group({
       images: [null, Validators.required],
     });
@@ -26,23 +30,37 @@ export class ImagesPage implements OnInit {
 
   ngOnInit() { }
 
+  async showToast(msg: string) {
+    const toast = await this.toastCtrl.create({
+      message: msg,
+      duration: 3000,
+    });
+
+    await toast.present();
+  }
+
   setOpen(val: boolean){
+    this.normailzeView()
     this.isImageModalOpen = val
   }
 
   setPreviewOpen(val: boolean){
+    this.normailzeView()
     if(!this.selectedImages.length){
+      this.showToast('Please choose some image before preview')
       return
     }
     this.isPreviewModalOpen = val
   }
 
   getImages(){
+    this.normailzeView()
     const takePicture = async () => {
       const perm = await Camera.checkPermissions()
       if(!perm){
         const gotPerm = await Camera.requestPermissions()
         if(!gotPerm){
+          this.showToast('Please allow permissions to access camera')
           return;
         }
       }
@@ -58,11 +76,13 @@ export class ImagesPage implements OnInit {
   }
 
   pickImages(){
+    this.normailzeView()
     const pickPicture = async () => {
       const perm = await Camera.checkPermissions()
       if(!perm){
         const gotPerm = await Camera.requestPermissions()
         if(!gotPerm){
+          this.showToast('Please allow media permission for this feature')
           return;
         }
       }
@@ -109,14 +129,22 @@ export class ImagesPage implements OnInit {
 
   submitAllImages(){
     if (this.selectedImages.length === 0) {
+      this.showToast('Please choose some image before submitting')
       return;
     }
+    this.len = this.selectedImages.length
     this.imgUpl.uploadImage(this.selectedImages).subscribe((res: Success)=>{
       if(res.success){
         this.selectedImages=[];
+        this.uploadSucces=true
+        this.uploadData = res
         console.log(res)
       }
     });
   }
 
+  normailzeView(){
+    this.uploadSucces=false
+    this.len=0
+  }
 }
