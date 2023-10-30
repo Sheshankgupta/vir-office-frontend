@@ -114,6 +114,7 @@ export class ImagesPage implements OnInit {
     this.imgUpl.uploadImage(this.selectedImages).subscribe((res: Success)=>{
       if(res.success){
         this.selectedImages=[];
+        console.log(res)
       }
     });
   }

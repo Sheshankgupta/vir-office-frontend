@@ -11,9 +11,9 @@ export class ImageUploadService {
   uploadImage(formData: any): any {
     console.log(formData);
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    return this.http.post<HttpResponse<Success>>(
-      `${this.baseURL}/upload`,
-      { data: formData }, // Send formData directly without wrapping it in an array
+    return this.http.post<HttpResponse<any>>(
+      `https://node-server-8z6p.onrender.com/upload`,
+      { data: formData },
       { headers }
     );
   }
