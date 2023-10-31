@@ -1,0 +1,129 @@
+nav {
+  height: 5rem;
+  width: 100%;
+}
+$magic-line-font-stack:  -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;
+$magic-line-height: 5px !default;
+$magic-line-items: 5 !default;
+$magic-line-bg: rgb(0,0,0) !default;
+$magic-line-color: #FFF !default;
+$magic-line-light-bg: rgb(210,210,210) !default;
+$magic-line-light-color: gray !default;
+$magic-line-primary-bg: magenta !default;
+$magic-line-primary-color: #FFF !default;
+
+.mobile-footer {
+	position: absolute;
+  bottom: 0;
+  left: 0;
+  color: $magic-line-color;
+  font-size: 1rem;
+  font-family: $magic-line-font-stack ;
+	padding:0;
+	background: $magic-line-bg;
+	overflow: hidden;
+	a {
+	  position: relative;
+    overflow: hidden;
+		width: 100%/$magic-line-items;
+		height: 100%;
+		display: inline-block;
+		padding: 0;
+    color: currentColor;
+    line-height: 12;
+    font-size: 0.725em;
+		text-align: center;
+    text-decoration:none;
+    text-indent: -9999rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    will-change: background, line-height;
+		transition: background .15s ease-in-out, line-height .2s ease .2s;
+    &:hover, &:focus {
+      background-color: rgba(128,128,128,0.3);
+      svg {
+        transform: scale(1.5);
+        opacity: 0.6;
+      }
+    }
+    &:focus, &:active {
+      outline: none;
+			svg {
+				opacity: .8;
+			}
+    }
+    &:active {
+			svg {
+				opacity: 1;
+			}
+    }
+		svg {
+      position: absolute;
+			fill: currentColor;
+			top: calc(30% + #{$magic-line-height/2});
+      left: 30%;
+			width: 40%;
+			height: 40%;
+      transform: scale(1);
+      transform-origin: center;
+      will-change: opacity, transform, top;
+			transition: opacity .2s ease, transform .2s ease, top .2s ease;
+			opacity: 0.4;
+      pointer-events: none;
+		}
+		&.active {
+      background-color: rgba(128,128,128,0.15);
+      text-indent: 0;
+      line-height: 10;
+      transition-delay: 0s, 0s, 0s;
+			svg {
+			  top: calc(17.5% + #{$magic-line-height/2});
+        transform-origin: center bottom;
+				opacity: 1;
+			}
+      &:hover, &:focus, &:active{
+        svg {
+          transform: scale(1);
+        }
+      }
+		}
+    &.traversing svg {
+      transition-delay: 0s, 0s, 0s;
+      animation: .15s traversing ease-out both;
+    }
+	}
+	.line {
+		position: absolute;
+		left: 0;
+		top: 0;
+    width: auto;
+		height: $magic-line-height;
+    text-indent: -9999rem;
+		transform: translateX(-50%);
+		border-radius: $magic-line-height/2;
+		background: currentColor;
+		transition: left .5s ease-out;
+		z-index: 10;
+	}
+  // Traversing animation
+  @keyframes traversing {
+    0% { opacity: 1; }
+    100% { opacity: 0.4; }
+  }
+  // Light color mode
+  &.light {
+    background-color: $magic-line-light-bg;
+    color:  $magic-line-light-color;
+    svg {
+      fill: $magic-line-light-color;
+    }
+  }
+  // Primary color mode
+  &.primary {
+    background: $magic-line-primary-bg;
+    color:  $magic-line-primary-color;
+    svg {
+      fill: $magic-line-primary-color;
+    }
+  }
+}

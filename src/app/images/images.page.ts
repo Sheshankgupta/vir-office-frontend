@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { ImageUploadService } from '../services/image-upload.service';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { Camera, CameraResultType } from '@capacitor/camera';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { HttpClient } from '@angular/common/http';
 import { Success } from '../models/success';
-import { ToastController } from '@ionic/angular';
-
+import { AlertController, Platform, ToastController } from '@ionic/angular';
+import { Capacitor } from '@capacitor/core';
 
 @Component({
   selector: 'app-images',
@@ -22,7 +22,15 @@ export class ImagesPage implements OnInit {
   len: number = 0;
   uploadData: any;
 
-  constructor(private formBuilder: FormBuilder, private imgUpl: ImageUploadService, private http: HttpClient, private toastCtrl: ToastController) {
+
+  constructor(
+    private formBuilder: FormBuilder,
+    private imgUpl: ImageUploadService,
+    private http: HttpClient,
+    private toastCtrl: ToastController,
+    private alertCtrl: AlertController,
+    private platform: Platform
+  ) {
     this.imageForm = this.formBuilder.group({
       images: [null, Validators.required],
     });
@@ -39,49 +47,86 @@ export class ImagesPage implements OnInit {
     await toast.present();
   }
 
-  setOpen(val: boolean){
+  async presentAlert(callback: () => void) {
+    const alert = await this.alertCtrl.create({
+      header: 'Alert',
+      subHeader: 'Do you want to take more pictures?',
+      buttons: [
+        {
+          text: 'No',
+          handler: () => {
+            console.log('Let me think');
+          }
+        },
+        {
+          text: 'Yes!',
+          handler: () => {
+            callback()
+          }
+        }
+      ]
+    }).then(res => {
+      res.present();
+    });
+  }
+
+  setOpen(val: boolean) {
     this.normailzeView()
     this.isImageModalOpen = val
   }
 
-  setPreviewOpen(val: boolean){
+  setPreviewOpen(val: boolean) {
     this.normailzeView()
-    if(!this.selectedImages.length){
+    if (!this.selectedImages.length) {
       this.showToast('Please choose some image before preview')
       return
     }
     this.isPreviewModalOpen = val
   }
 
-  getImages(){
+  async getImages() {
     this.normailzeView()
-    const takePicture = async () => {
-      const perm = await Camera.checkPermissions()
-      if(!perm){
-        const gotPerm = await Camera.requestPermissions()
-        if(!gotPerm){
-          this.showToast('Please allow permissions to access camera')
-          return;
+    if (Capacitor.isNativePlatform()) {
+      const takePhoto = async (): Promise<void> => {
+        const photo = await Camera.getPhoto({
+          quality: 90,
+          allowEditing: true,
+          resultType: CameraResultType.DataUrl,
+          source: CameraSource.Camera
+        });
+        this.selectedImages.push(photo.dataUrl)
+        // Ask the user if they want to take another photo
+        this.presentAlert(takePhoto);
+      };
+      await takePhoto();
+    } else {
+      const takePicture = async () => {
+        const perm = await Camera.checkPermissions()
+        if(!perm){
+          const gotPerm = await Camera.requestPermissions()
+          if(!gotPerm){
+            this.showToast('Please allow permissions to access camera')
+            return;
+          }
         }
-      }
-      const image = await Camera.getPhoto({
-        quality: 90,
-        allowEditing: true,
-        resultType: CameraResultType.DataUrl,
-      });
-
-      this.selectedImages.push(image.dataUrl)
-    };
-    takePicture()
+        const image = await Camera.getPhoto({
+          quality: 90,
+          allowEditing: true,
+          resultType: CameraResultType.DataUrl,
+        });
+        this.selectedImages.push(image.dataUrl)
+      };
+      takePicture()
+    }
   }
 
-  pickImages(){
+  pickImages() {
     this.normailzeView()
     const pickPicture = async () => {
       const perm = await Camera.checkPermissions()
-      if(!perm){
+      if (!perm) {
         const gotPerm = await Camera.requestPermissions()
-        if(!gotPerm){
+        if (!gotPerm) {
           this.showToast('Please allow media permission for this feature')
           return;
         }
@@ -91,16 +136,16 @@ export class ImagesPage implements OnInit {
         limit: 0,
       });
       console.log(image)
-      image.photos.forEach((img)=>{
+      image.photos.forEach((img) => {
         let base64String = this.fetchContentFromURL(img.webPath)
-            .then((blob) => this.blobToBase64(blob))
-            .then((base64String) => {
-              console.log('Base64 String:', base64String);
-              this.selectedImages.push(`data:image/png;base64, ${base64String}`)
-            })
-            .catch((error) => {
-              console.error('Error:', error);
-            });
+          .then((blob) => this.blobToBase64(blob))
+          .then((base64String) => {
+            console.log('Base64 String:', base64String);
+            this.selectedImages.push(`data:image/png;base64, ${base64String}`)
+          })
+          .catch((error) => {
+            console.error('Error:', error);
+          });
       })
     };
     pickPicture()
@@ -120,31 +165,31 @@ export class ImagesPage implements OnInit {
           reject('Failed to convert Blob to Base64.');
         }
       };
-      if(!blob){
+      if (!blob) {
         return
       }
       reader.readAsDataURL(blob);
     });
   }
 
-  submitAllImages(){
+  submitAllImages() {
     if (this.selectedImages.length === 0) {
       this.showToast('Please choose some image before submitting')
       return;
     }
     this.len = this.selectedImages.length
-    this.imgUpl.uploadImage(this.selectedImages).subscribe((res: Success)=>{
-      if(res.success){
-        this.selectedImages=[];
-        this.uploadSucces=true
+    this.imgUpl.uploadImage(this.selectedImages).subscribe((res: Success) => {
+      if (res.success) {
+        this.selectedImages = [];
+        this.uploadSucces = true
         this.uploadData = res
         console.log(res)
       }
     });
   }
 
-  normailzeView(){
-    this.uploadSucces=false
-    this.len=0
+  normailzeView() {
+    this.uploadSucces = false
+    this.len = 0
   }
 }
