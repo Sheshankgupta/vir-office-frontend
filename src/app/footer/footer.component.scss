@@ -39,13 +39,15 @@ $magic-line-primary-color: #FFF !default;
     white-space: nowrap;
     will-change: background, line-height;
 		transition: background .15s ease-in-out, line-height .2s ease .2s;
-    &:hover, &:focus {
-      background-color: rgba(128,128,128,0.3);
-      svg {
-        transform: scale(1.5);
-        opacity: 0.6;
-      }
-    }
+    border-top: 8px solid transparent;
+    transition: border-top 0.8s ease-in;
+    // &:hover, &:focus {
+    //   background-color: rgba(128,128,128,0.3);
+    //   svg {
+    //     transform: scale(1.5);
+    //     opacity: 0.6;
+    //   }
+    // }
     &:focus, &:active {
       outline: none;
 			svg {
@@ -53,7 +55,9 @@ $magic-line-primary-color: #FFF !default;
 			}
     }
     &:active {
+      border-top: 8px solid white;
 			svg {
+        transform: scale(1.5);
 				opacity: 1;
 			}
     }
@@ -70,12 +74,14 @@ $magic-line-primary-color: #FFF !default;
 			transition: opacity .2s ease, transform .2s ease, top .2s ease;
 			opacity: 0.4;
       pointer-events: none;
+      filter: drop-shadow(2px 2px 1px rgb(160, 160, 160));
 		}
 		&.active {
       background-color: rgba(128,128,128,0.15);
       text-indent: 0;
       line-height: 10;
       transition-delay: 0s, 0s, 0s;
+      border-top: 8px solid white;
 			svg {
 			  top: calc(17.5% + #{$magic-line-height/2});
         transform-origin: center bottom;
@@ -126,4 +132,14 @@ $magic-line-primary-color: #FFF !default;
       fill: $magic-line-primary-color;
     }
   }
+}
+.disabled{
+  cursor: not-allowed;
+  // pointer-events: none;
+}
+
+.showTop{
+  position: fixed;
+  bottom: 50px;
+  // z-index: 10000;
 }

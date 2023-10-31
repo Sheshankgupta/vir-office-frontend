@@ -21,6 +21,10 @@ export class ImagesPage implements OnInit {
   uploadSucces: boolean = false;
   len: number = 0;
   uploadData: any;
+  uploadtime: any;
+  responsetime: any;
+  timeDiff: any;
+  showLoader: boolean = false;
 
 
   constructor(
@@ -102,9 +106,9 @@ export class ImagesPage implements OnInit {
     } else {
       const takePicture = async () => {
         const perm = await Camera.checkPermissions()
-        if(!perm){
+        if (!perm) {
           const gotPerm = await Camera.requestPermissions()
-          if(!gotPerm){
+          if (!gotPerm) {
             this.showToast('Please allow permissions to access camera')
             return;
           }
@@ -173,6 +177,8 @@ export class ImagesPage implements OnInit {
   }
 
   submitAllImages() {
+    this.showLoader = true
+    this.uploadtime = this.getCurrentTime()
     if (this.selectedImages.length === 0) {
       this.showToast('Please choose some image before submitting')
       return;
@@ -180,7 +186,12 @@ export class ImagesPage implements OnInit {
     this.len = this.selectedImages.length
     this.imgUpl.uploadImage(this.selectedImages).subscribe((res: Success) => {
       if (res.success) {
+        this.showLoader = false
+        this.responsetime = this.getCurrentTime()
+        this.timeDiff = this.getTimeDiff(this.responsetime, this.uploadtime)
         this.selectedImages = [];
+        this.isImageModalOpen = false;
+        this.isPreviewModalOpen = false;
         this.uploadSucces = true
         this.uploadData = res
         console.log(res)
@@ -188,8 +199,53 @@ export class ImagesPage implements OnInit {
     });
   }
 
+  getCurrentTime() {
+    const currentTime = new Date();
+
+    // Get the current time in various formats, including milliseconds
+    const hours = currentTime.getHours(); // 0-23
+    const minutes = currentTime.getMinutes(); // 0-59
+    const seconds = currentTime.getSeconds(); // 0-59
+    const milliseconds = currentTime.getMilliseconds(); // 0-999
+
+    // Display the current time, including milliseconds
+    return `${hours}:${minutes}:${seconds}.${milliseconds}`;
+  }
+
+  getTimeDiff(time1: any, time2: any) {
+
+    const [hours1, minutes1, seconds1] = time1.split(":").map(parseFloat);
+    const milliseconds1 = parseFloat(time1.split(".")[1]);
+    const [hours2, minutes2, seconds2] = time2.split(":").map(parseFloat);
+    const milliseconds2 = parseFloat(time2.split(".")[1]);
+
+    // Calculate the time difference in milliseconds
+    const timestamp1 = hours1 * 3600000 + minutes1 * 60000 + seconds1 * 1000 + milliseconds1;
+    const timestamp2 = hours2 * 3600000 + minutes2 * 60000 + seconds2 * 1000 + milliseconds2;
+    const timeDifference = Math.abs(timestamp2 - timestamp1);
+
+    // Convert the time difference to a human-readable format
+    const milliseconds = timeDifference % 1000;
+    const seconds = Math.floor((timeDifference / 1000) % 60);
+    const minutes = Math.floor((timeDifference / (1000 * 60)) % 60);
+    const hours = Math.floor(timeDifference / (1000 * 60 * 60));
+    // Display the time difference
+    return `${hours}h ${minutes}m ${seconds}s ${milliseconds}ms`;
+  }
+
   normailzeView() {
     this.uploadSucces = false
     this.len = 0
+  }
+
+  ionViewDidLeave(){
+    this.normailzeView()
+    this.showLoader = false
+    this.isImageModalOpen = false;
+    this.isPreviewModalOpen = false;
+  }
+
+  expand(e: any) {
+    // e.target.classList.add('expand')
   }
 }

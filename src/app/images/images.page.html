@@ -1,28 +1,30 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>images</ion-title>
-  </ion-toolbar>
-</ion-header>
-
 <ion-content>
-
-  <div class="d-flex justify-content-center my-2">
-    <ion-button (click)="setOpen(true)" class="w-75">Click/Upload Images</ion-button>
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title>Images</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  <div class="d-flex justify-content-center mb-2 mt-5">
+    <button (click)="setOpen(true)" class="w-75">Click/Upload Images</button>
   </div>
   <br>
   <div class="d-flex justify-content-center my-2">
-    <ion-button (click)="setPreviewOpen(true)" class="w-75">Preview Images</ion-button>
+    <button (click)="setPreviewOpen(true)" class="w-75">Preview Images</button>
   </div>
   <br>
   <div class="d-flex justify-content-center my-2">
-    <ion-button (click)="submitAllImages()" class="w-75">Submit Images</ion-button>
+    <button (click)="submitAllImages()" class="w-75" *ngIf="!showLoader" style="height: 85px;">Submit Images</button>
+    <button class="w-75" *ngIf="showLoader" style="height: 85px;"><img src="assets/images/loader.gif" height="70"></button>
   </div>
 
-  <div *ngIf="uploadSucces" class="px-2">
+  <div *ngIf="uploadSucces" class="px-2 text-center text-dark mt-5">
     <span class="font-bold">Upload Size: </span><span>{{len}}</span><br/>
     <span class="font-bold">Upload Status: </span><span>{{uploadData.success ? 'Successful' : 'Fail'}}</span><br/>
     <span class="font-bold">Upload Response Code: </span><span>{{uploadData.responseCode}}</span><br/>
     <span class="font-bold">Upload Message: </span><span>{{uploadData.message}}</span><br/>
+    <span class="font-bold">Upload Time: </span><span>{{uploadtime}}</span><br/>
+    <span class="font-bold">Response Time: </span><span>{{responsetime}}</span><br/>
+    <span class="font-bold">Responded In: </span><span>{{timeDiff}}</span><br/>
   </div>
 
   <!-- <form [formGroup]="imageForm" (ngSubmit)="submitAllImages($event)">
@@ -73,9 +75,11 @@
     <ng-template>
       <ion-content>
         <ion-list class="mt-2 p-2">
-          <ion-item *ngFor="let img of selectedImages">
-            <ion-img src="{{img}}"></ion-img>
-          </ion-item>
+          <div class="d-flex" style="flex-wrap: wrap; row-gap: 5px;">
+            <ion-item *ngFor="let img of selectedImages" style="flex: 0 0 33.333333%;">
+              <ion-img src="{{img}}" height="150" (click)="expand($event)"></ion-img>
+            </ion-item>
+          </div>
           <ion-item (click)="setPreviewOpen(false)">
             <ion-button class="full-button">
               <p>Close</p>

@@ -6,7 +6,7 @@
       "files": ["*.ts"],
       "parserOptions": {
         "project": ["tsconfig.json"],
-        "tsconfigRootDir": "vir-office-frontend",
+        "tsconfigRootDir": "",
         "createDefaultProgram": true
       },
       "extends": [

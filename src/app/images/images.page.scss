@@ -1,12 +1,11 @@
 .full-button{
   width: 100%;
 }
-.w-75{
-  width: 75%;
-}
 
-// ion-list ion-item::part(native) {
-//   .item-inner{
-//     border: none;
-//   }
-// }
+button{
+  background: rgb(275,275,275);
+  padding-block: 10px;
+  border-radius: 10px;
+  color: rgb(120,120,120);
+  box-shadow: 1px 1px 6px rgb(120,120,120);
+}
