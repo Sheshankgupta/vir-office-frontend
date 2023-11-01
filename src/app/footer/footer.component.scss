@@ -143,3 +143,15 @@ $magic-line-primary-color: #FFF !default;
   bottom: 50px;
   // z-index: 10000;
 }
+
+nav{
+  box-shadow: 0px -7px 14px #b8b8b8;
+  border-top: 1px solid #ababab;
+  a{
+    border-right: 1px solid #ababab;
+    &:last-child{
+      border-right: 0px;
+    }
+  }
+
+}

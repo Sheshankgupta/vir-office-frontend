@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -6,5 +7,10 @@ import { Component } from '@angular/core';
   styleUrls: ['app.component.scss'],
 })
 export class AppComponent {
-  constructor() {}
+  currentRoute: string;
+
+  constructor(private router: Router) {
+    this.currentRoute = this.router.url
+    console.log(this.currentRoute)
+  }
 }

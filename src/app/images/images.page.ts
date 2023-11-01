@@ -177,12 +177,12 @@ export class ImagesPage implements OnInit {
   }
 
   submitAllImages() {
-    this.showLoader = true
-    this.uploadtime = this.getCurrentTime()
     if (this.selectedImages.length === 0) {
       this.showToast('Please choose some image before submitting')
       return;
     }
+    this.showLoader = true
+    this.uploadtime = this.getCurrentTime()
     this.len = this.selectedImages.length
     this.imgUpl.uploadImage(this.selectedImages).subscribe((res: Success) => {
       if (res.success) {

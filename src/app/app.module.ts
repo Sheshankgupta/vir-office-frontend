@@ -11,7 +11,9 @@ import { FooterComponent } from './footer/footer.component';
 
 @NgModule({
   declarations: [AppComponent],
-  imports: [BrowserModule, IonicModule.forRoot(), AppRoutingModule, FooterComponent],
+  imports: [BrowserModule, IonicModule.forRoot({
+    mode: 'ios'
+  }), AppRoutingModule, FooterComponent],
   providers: [{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy }],
   bootstrap: [AppComponent],
 })

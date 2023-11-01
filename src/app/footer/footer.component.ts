@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
-import { RouterLinkWithHref } from '@angular/router';
+import { Component, Input } from '@angular/core';
+import { ActivatedRoute, Router, RouterLinkWithHref } from '@angular/router';
 import { IonicModule, NavController, ToastController } from '@ionic/angular';
 
 @Component({
@@ -10,19 +10,23 @@ import { IonicModule, NavController, ToastController } from '@ionic/angular';
   standalone: true,
   imports: [IonicModule, RouterLinkWithHref, CommonModule],
 })
-export class FooterComponent  implements OnInit {
-
+export class FooterComponent {
+  @Input() currentRoute!: string;
   isActive = {
-    home: true,
+    home: false,
     uploadImages: false,
     fetchAllUploads: false,
     settings: false,
     profile: false,
-
   };
-  constructor(private navCtrl: NavController, private toastCtrl: ToastController) { }
 
-  ngOnInit() {}
+  constructor(private navCtrl: NavController, private toastCtrl: ToastController, private router: Router, private route: ActivatedRoute) {
+    console.log(this.currentRoute)
+  }
+
+  ionViewWillEnter(){
+
+  }
 
   ngOnChanges() {
     this.isActive = {
@@ -103,5 +107,11 @@ export class FooterComponent  implements OnInit {
         break
     }
   }
-
+  routingHandler(tabRoute: string){
+    switch (tabRoute) {
+      case 'home' || '/':
+        this.isActive['home'] = true
+        break
+    }
+  }
 }
