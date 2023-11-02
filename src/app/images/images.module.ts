@@ -21,6 +21,5 @@ import { RouteReuseStrategy } from '@angular/router';
     ReactiveFormsModule
   ],
   declarations: [ImagesPage],
-  providers: [ImageUploadService]
 })
 export class ImagesPageModule {}

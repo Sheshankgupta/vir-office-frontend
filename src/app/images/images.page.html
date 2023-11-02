@@ -1,21 +1,21 @@
 <ion-content>
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title>Images</ion-title>
+      <ion-title>Home</ion-title>
     </ion-toolbar>
   </ion-header>
   <div class="d-flex justify-content-center mb-2 mt-5">
-    <button (click)="setOpen(true)" class="w-75">Click/Upload Images</button>
+    <button (click)="setOpen(true)" class="w-75">Click/Choose Images</button>
   </div>
   <br>
   <div class="d-flex justify-content-center my-2">
-    <button (click)="setPreviewOpen(true)" class="w-75">Preview Images</button>
+    <button (click)="previewSubmit()" class="w-75">Upload and Preview</button>
   </div>
   <br>
-  <div class="d-flex justify-content-center my-2">
+  <!-- <div class="d-flex justify-content-center my-2">
     <button (click)="submitAllImages()" class="w-75" *ngIf="!showLoader" style="height: 85px;">Submit Images</button>
     <button class="w-75" *ngIf="showLoader" style="height: 85px;"><img src="assets/images/loader1.gif" height="70"></button>
-  </div>
+  </div> -->
 
   <div *ngIf="uploadSucces" class="px-2 text-center text-dark mt-5">
     <span class="font-bold">Upload Size: </span><span>{{len}}</span><br/>
@@ -42,7 +42,7 @@
   <ion-modal #modal [isOpen]="isImageModalOpen" [initialBreakpoint]="0.27" [breakpoints]="[0.27, 0.5]" [backdropDismiss]="false">
     <ng-template>
       <ion-content>
-        <ion-list class="mt-2 p-2">
+        <ion-list class="mt-2 p-2" lines="none">
           <ion-item (click)="getImages()">
             <ion-avatar slot="start" class="d-flex justify-content-center align-items-center">
               <ion-icon name="camera" style="font-size: 26px;"></ion-icon>
@@ -71,10 +71,10 @@
   </ion-modal>
 
 
-  <ion-modal #preview [isOpen]="isPreviewModalOpen" [initialBreakpoint]="0.25" [breakpoints]="[0.25, 0.5, 0.75, 0.90, 1]" [backdropDismiss]="false">
+  <!-- <ion-modal #preview [isOpen]="isPreviewModalOpen" [initialBreakpoint]="0.25" [breakpoints]="[0.25, 0.5, 0.75, 0.90, 1]" [backdropDismiss]="false">
     <ng-template>
       <ion-content>
-        <ion-list class="mt-2 p-2">
+        <ion-list class="mt-2 p-2" lines="none">
           <div class="d-flex" style="flex-wrap: wrap; row-gap: 5px;">
             <ion-item *ngFor="let img of selectedImages" style="flex: 0 0 33.333333%;">
               <ion-img src="{{img}}" height="150" (click)="expand($event)"></ion-img>
@@ -88,6 +88,24 @@
         </ion-list>
       </ion-content>
     </ng-template>
-  </ion-modal>
+  </ion-modal> -->
+
+  <!-- <ion-modal id="expandimage" #expandimage [isOpen]="true">
+    <ng-template>
+      <div class="wrapper">
+        <div class="d-flex justify-content-between align-items-center">
+          <h1>Image</h1>
+          <div style="column-gap: 10px;" class="d-flex justify-content-end p-2">
+            <ion-icon name="trash-outline" style="height:20px"></ion-icon>
+            <ion-icon (click)="expandimage.dismiss()" name="close-circle-outline" style="height:20px"></ion-icon>
+          </div>
+        </div>
+
+        <ion-list lines="none">
+
+        </ion-list>
+      </div>
+    </ng-template>
+  </ion-modal> -->
 </ion-content>
 

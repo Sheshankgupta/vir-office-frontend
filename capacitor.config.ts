@@ -2,7 +2,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'io.ionic.starter',
-  appName: 'vir-office-frontend',
+  appName: 'Virtual Offices',
   webDir: 'www',
   server: {
     androidScheme: 'https'

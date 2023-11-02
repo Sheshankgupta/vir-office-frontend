@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
-import { ActivatedRoute, Router, RouterLinkWithHref } from '@angular/router';
+import { Component } from '@angular/core';
+import { NavigationEnd, Router, RouterLinkWithHref } from '@angular/router';
 import { IonicModule, NavController, ToastController } from '@ionic/angular';
+import { Location } from '@angular/common';
+
 
 @Component({
   selector: 'app-footer',
@@ -11,7 +13,6 @@ import { IonicModule, NavController, ToastController } from '@ionic/angular';
   imports: [IonicModule, RouterLinkWithHref, CommonModule],
 })
 export class FooterComponent {
-  @Input() currentRoute!: string;
   isActive = {
     home: false,
     uploadImages: false,
@@ -20,22 +21,23 @@ export class FooterComponent {
     profile: false,
   };
 
-  constructor(private navCtrl: NavController, private toastCtrl: ToastController, private router: Router, private route: ActivatedRoute) {
-    console.log(this.currentRoute)
+  constructor(private navCtrl: NavController, private toastCtrl: ToastController, private location: Location, private router: Router) {
+    router.events.subscribe((val) => {
+      // see also
+      if(val instanceof NavigationEnd){
+        if(this.location.path() == ''){
+          this.isActive['home'] = true
+        } else{
+          this.routingHandler(this.location.path().slice(1))
+        }
+      }
+  });
   }
 
-  ionViewWillEnter(){
-
-  }
+  ionViewWillEnter(){ }
 
   ngOnChanges() {
-    this.isActive = {
-      home: false,
-      uploadImages: false,
-      fetchAllUploads: false,
-      settings: false,
-      profile: false,
-    };
+    this.retrieveBack()
   }
 
   async showToast(msg: string) {
@@ -66,7 +68,7 @@ export class FooterComponent {
 
       case 'fetchAllUploads':
         this.makeItTrue('fetchAllUploads');
-        this.navCtrl.navigateForward('/allUploads');
+        this.navCtrl.navigateForward('/collection');
         break;
 
       case 'settings':
@@ -82,13 +84,7 @@ export class FooterComponent {
   }
 
   makeItTrue(tabid: string){
-    this.isActive = {
-      home: false,
-      uploadImages: false,
-      fetchAllUploads: false,
-      settings: false,
-      profile: false,
-    };
+    this.retrieveBack()
     switch (tabid) {
       case 'home':
         this.isActive['home'] = true
@@ -108,10 +104,27 @@ export class FooterComponent {
     }
   }
   routingHandler(tabRoute: string){
+    this.retrieveBack()
     switch (tabRoute) {
-      case 'home' || '/':
+      case 'home' || '/' || '':
         this.isActive['home'] = true
         break
+      case 'images':
+        this.isActive['uploadImages'] = true
+        break
+      case 'collection':
+        this.isActive['fetchAllUploads'] = true
+        break
+
     }
+  }
+  retrieveBack(){
+    this.isActive = {
+      home: false,
+      uploadImages: false,
+      fetchAllUploads: false,
+      settings: false,
+      profile: false,
+    };
   }
 }

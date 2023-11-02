@@ -7,10 +7,6 @@ import { ActivatedRoute, Router } from '@angular/router';
   styleUrls: ['app.component.scss'],
 })
 export class AppComponent {
-  currentRoute: string;
 
-  constructor(private router: Router) {
-    this.currentRoute = this.router.url
-    console.log(this.currentRoute)
-  }
+  constructor() {  }
 }

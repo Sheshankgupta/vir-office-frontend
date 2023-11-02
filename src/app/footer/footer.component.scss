@@ -1,3 +1,5 @@
+@use "sass:math";
+
 nav {
   height: 5rem;
   width: 100%;
@@ -11,6 +13,7 @@ $magic-line-light-bg: rgb(210,210,210) !default;
 $magic-line-light-color: gray !default;
 $magic-line-primary-bg: magenta !default;
 $magic-line-primary-color: #FFF !default;
+$div-var: math.div($magic-line-height, 2);
 
 .mobile-footer {
 	position: absolute;
@@ -25,20 +28,20 @@ $magic-line-primary-color: #FFF !default;
 	a {
 	  position: relative;
     overflow: hidden;
-		width: 100%/$magic-line-items;
-		height: 100%;
-		display: inline-block;
-		padding: 0;
-    color: currentColor;
+    width: 20%;
+    height: 100%;
+    display: inline-block;
+    padding: 0;
+    color: rgb(35 34 34);
     line-height: 12;
     font-size: 0.725em;
-		text-align: center;
-    text-decoration:none;
+    text-align: center;
+    text-decoration: none;
     text-indent: -9999rem;
     text-overflow: ellipsis;
     white-space: nowrap;
     will-change: background, line-height;
-		transition: background .15s ease-in-out, line-height .2s ease .2s;
+    transition: background 0.15s ease-in-out, line-height 0.2s ease 0.2s;
     border-top: 8px solid transparent;
     transition: border-top 0.8s ease-in;
     // &:hover, &:focus {
@@ -63,27 +66,27 @@ $magic-line-primary-color: #FFF !default;
     }
 		svg {
       position: absolute;
-			fill: currentColor;
-			top: calc(30% + #{$magic-line-height/2});
+      fill: rgb(35 34 34);
+      top: calc(30% + 2.5px);
       left: 30%;
-			width: 40%;
-			height: 40%;
+      width: 40%;
+      height: 40%;
       transform: scale(1);
       transform-origin: center;
       will-change: opacity, transform, top;
-			transition: opacity .2s ease, transform .2s ease, top .2s ease;
-			opacity: 0.4;
+      transition: opacity 0.2s ease, transform 0.2s ease, top 0.2s ease;
+      opacity: 0.4;
       pointer-events: none;
-      filter: drop-shadow(2px 2px 1px rgb(160, 160, 160));
+      filter: drop-shadow(2px 2px 1px rgb(115, 115, 115));
 		}
 		&.active {
-      background-color: rgba(128,128,128,0.15);
+      background-color: rgba(128, 128, 128, 0.15);
       text-indent: 0;
       line-height: 10;
       transition-delay: 0s, 0s, 0s;
       border-top: 8px solid white;
 			svg {
-			  top: calc(17.5% + #{$magic-line-height/2});
+			  top: calc(17.5% + $div-var);
         transform-origin: center bottom;
 				opacity: 1;
 			}
@@ -106,7 +109,7 @@ $magic-line-primary-color: #FFF !default;
 		height: $magic-line-height;
     text-indent: -9999rem;
 		transform: translateX(-50%);
-		border-radius: $magic-line-height/2;
+		border-radius: calc($magic-line-height/2);
 		background: currentColor;
 		transition: left .5s ease-out;
 		z-index: 10;

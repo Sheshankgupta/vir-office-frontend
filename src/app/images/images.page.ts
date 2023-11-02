@@ -4,7 +4,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { HttpClient } from '@angular/common/http';
 import { Success } from '../models/success';
-import { AlertController, Platform, ToastController } from '@ionic/angular';
+import { AlertController, NavController, Platform, ToastController } from '@ionic/angular';
 import { Capacitor } from '@capacitor/core';
 
 @Component({
@@ -15,11 +15,11 @@ import { Capacitor } from '@capacitor/core';
 export class ImagesPage implements OnInit {
 
   imageForm: FormGroup;
-  selectedImages: any = [];
+  selectedImages: any[] | undefined = [];
   isImageModalOpen: boolean = false;
   isPreviewModalOpen: boolean = false;
   uploadSucces: boolean = false;
-  len: number = 0;
+  len: number | undefined = 0;
   uploadData: any;
   uploadtime: any;
   responsetime: any;
@@ -33,7 +33,8 @@ export class ImagesPage implements OnInit {
     private http: HttpClient,
     private toastCtrl: ToastController,
     private alertCtrl: AlertController,
-    private platform: Platform
+    private platform: Platform,
+    private navCtrl: NavController
   ) {
     this.imageForm = this.formBuilder.group({
       images: [null, Validators.required],
@@ -41,6 +42,10 @@ export class ImagesPage implements OnInit {
   }
 
   ngOnInit() { }
+
+  ionViewWillEnter(){
+    this.selectedImages = this.imgUpl.getImages()
+  }
 
   async showToast(msg: string) {
     const toast = await this.toastCtrl.create({
@@ -58,9 +63,6 @@ export class ImagesPage implements OnInit {
       buttons: [
         {
           text: 'No',
-          handler: () => {
-            console.log('Let me think');
-          }
         },
         {
           text: 'Yes!',
@@ -79,13 +81,13 @@ export class ImagesPage implements OnInit {
     this.isImageModalOpen = val
   }
 
-  setPreviewOpen(val: boolean) {
-    this.normailzeView()
-    if (!this.selectedImages.length) {
-      this.showToast('Please choose some image before preview')
-      return
+  previewSubmit() {
+    if(!this.selectedImages || !this.selectedImages.length){
+      this.showToast('Please select some images before previewing.')
+      return;
     }
-    this.isPreviewModalOpen = val
+    this.imgUpl.setImages(this.selectedImages)
+    this.navCtrl.navigateForward('collection')
   }
 
   async getImages() {
@@ -98,9 +100,8 @@ export class ImagesPage implements OnInit {
           resultType: CameraResultType.DataUrl,
           source: CameraSource.Camera
         });
-        this.selectedImages.push(photo.dataUrl)
-        // Ask the user if they want to take another photo
-        this.presentAlert(takePhoto);
+        this.selectedImages?.push(photo.dataUrl)
+        await takePhoto();
       };
       await takePhoto();
     } else {
@@ -115,10 +116,10 @@ export class ImagesPage implements OnInit {
         }
         const image = await Camera.getPhoto({
           quality: 90,
-          allowEditing: true,
+          allowEditing: false,
           resultType: CameraResultType.DataUrl,
         });
-        this.selectedImages.push(image.dataUrl)
+        this.selectedImages?.push(image.dataUrl)
       };
       takePicture()
     }
@@ -139,13 +140,11 @@ export class ImagesPage implements OnInit {
         quality: 90,
         limit: 0,
       });
-      console.log(image)
       image.photos.forEach((img) => {
         let base64String = this.fetchContentFromURL(img.webPath)
           .then((blob) => this.blobToBase64(blob))
           .then((base64String) => {
-            console.log('Base64 String:', base64String);
-            this.selectedImages.push(`data:image/png;base64, ${base64String}`)
+            this.selectedImages?.push(`data:image/png;base64, ${base64String}`)
           })
           .catch((error) => {
             console.error('Error:', error);
@@ -176,63 +175,6 @@ export class ImagesPage implements OnInit {
     });
   }
 
-  submitAllImages() {
-    if (this.selectedImages.length === 0) {
-      this.showToast('Please choose some image before submitting')
-      return;
-    }
-    this.showLoader = true
-    this.uploadtime = this.getCurrentTime()
-    this.len = this.selectedImages.length
-    this.imgUpl.uploadImage(this.selectedImages).subscribe((res: Success) => {
-      if (res.success) {
-        this.showLoader = false
-        this.responsetime = this.getCurrentTime()
-        this.timeDiff = this.getTimeDiff(this.responsetime, this.uploadtime)
-        this.selectedImages = [];
-        this.isImageModalOpen = false;
-        this.isPreviewModalOpen = false;
-        this.uploadSucces = true
-        this.uploadData = res
-        console.log(res)
-      }
-    });
-  }
-
-  getCurrentTime() {
-    const currentTime = new Date();
-
-    // Get the current time in various formats, including milliseconds
-    const hours = currentTime.getHours(); // 0-23
-    const minutes = currentTime.getMinutes(); // 0-59
-    const seconds = currentTime.getSeconds(); // 0-59
-    const milliseconds = currentTime.getMilliseconds(); // 0-999
-
-    // Display the current time, including milliseconds
-    return `${hours}:${minutes}:${seconds}.${milliseconds}`;
-  }
-
-  getTimeDiff(time1: any, time2: any) {
-
-    const [hours1, minutes1, seconds1] = time1.split(":").map(parseFloat);
-    const milliseconds1 = parseFloat(time1.split(".")[1]);
-    const [hours2, minutes2, seconds2] = time2.split(":").map(parseFloat);
-    const milliseconds2 = parseFloat(time2.split(".")[1]);
-
-    // Calculate the time difference in milliseconds
-    const timestamp1 = hours1 * 3600000 + minutes1 * 60000 + seconds1 * 1000 + milliseconds1;
-    const timestamp2 = hours2 * 3600000 + minutes2 * 60000 + seconds2 * 1000 + milliseconds2;
-    const timeDifference = Math.abs(timestamp2 - timestamp1);
-
-    // Convert the time difference to a human-readable format
-    const milliseconds = timeDifference % 1000;
-    const seconds = Math.floor((timeDifference / 1000) % 60);
-    const minutes = Math.floor((timeDifference / (1000 * 60)) % 60);
-    const hours = Math.floor(timeDifference / (1000 * 60 * 60));
-    // Display the time difference
-    return `${hours}h ${minutes}m ${seconds}s ${milliseconds}ms`;
-  }
-
   normailzeView() {
     this.uploadSucces = false
     this.len = 0
@@ -240,12 +182,9 @@ export class ImagesPage implements OnInit {
 
   ionViewDidLeave(){
     this.normailzeView()
+    this.selectedImages = []
     this.showLoader = false
     this.isImageModalOpen = false;
     this.isPreviewModalOpen = false;
-  }
-
-  expand(e: any) {
-    // e.target.classList.add('expand')
   }
 }

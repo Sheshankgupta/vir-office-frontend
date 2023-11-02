@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { AppComponent } from './app.component';
+import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 
 const routes: Routes = [
   {
@@ -10,11 +11,16 @@ const routes: Routes = [
   },
   {
     path: 'home',
-    loadChildren: () => import('./home/home.module').then( m => m.HomePageModule)
+    loadChildren: () => import('./images/images.module').then( m => m.ImagesPageModule)
   },
   {
-    path: 'images',
-    loadChildren: () => import('./images/images.module').then( m => m.ImagesPageModule)
+    path: 'collection',
+    loadChildren: () => import('./collection/collection.module').then( m => m.CollectionPageModule)
+  },
+  {
+    path: '**',
+    pathMatch: 'full',
+    component: PageNotFoundComponent
   },
 ];
 
