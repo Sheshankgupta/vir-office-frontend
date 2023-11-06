@@ -9,7 +9,8 @@
   </div>
   <br>
   <div class="d-flex justify-content-center my-2">
-    <button (click)="previewSubmit()" class="w-75">Upload and Preview</button>
+    <button (click)="previewSubmit()" class="w-75" *ngIf="!showLoaderOnPrev">Upload and Preview</button>
+    <button class="w-75" *ngIf="showLoaderOnPrev"><img src="assets/images/btnloader.gif" height="20"></button>
   </div>
   <br>
   <!-- <div class="d-flex justify-content-center my-2">

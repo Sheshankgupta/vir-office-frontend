@@ -17,9 +17,10 @@ import { Capacitor } from '@capacitor/core';
   templateUrl: './images.page.html',
   styleUrls: ['./images.page.scss'],
 })
-export class ImagesPage implements OnInit {
+export class ImagesPage {
   imageForm: FormGroup;
-  selectedImages: any[] | undefined = [];
+  selectedImages: any[] = [];
+  selectedUncompressedImages: any[] = [];
   isImageModalOpen: boolean = false;
   isPreviewModalOpen: boolean = false;
   uploadSucces: boolean = false;
@@ -29,8 +30,9 @@ export class ImagesPage implements OnInit {
   responsetime: any;
   timeDiff: any;
   showLoader: boolean = false;
-  MAX_WIDTH = 320;
-  MAX_HEIGHT = 180;
+  showLoaderOnPrev: boolean = false;
+  MAX_WIDTH = 700;
+  MAX_HEIGHT = 700;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -45,8 +47,6 @@ export class ImagesPage implements OnInit {
       images: [null, Validators.required],
     });
   }
-
-  ngOnInit() {}
 
   ionViewWillEnter() {
     this.selectedImages = this.imgUpl.getImages();
@@ -88,11 +88,22 @@ export class ImagesPage implements OnInit {
     this.isImageModalOpen = val;
   }
 
-  previewSubmit() {
-    if (!this.selectedImages || !this.selectedImages.length) {
+  async previewSubmit() {
+    if (this.selectedImages.length > 0 && this.selectedUncompressedImages.length > 0) {
+      console.log(this.selectedUncompressedImages)
       this.showToast('Please select some images before previewing.');
       return;
     }
+
+    this.showLoaderOnPrev = true;
+    for(let i=0; i < this.selectedUncompressedImages.length; i++){
+      const img = await this.compressImage(this.selectedUncompressedImages[i])
+      this.selectedImages.push(img)
+    }
+    this.selectedUncompressedImages.forEach((data)=>{
+    })
+    this.showLoaderOnPrev = false;
+
     this.imgUpl.setImages(this.selectedImages);
     this.navCtrl.navigateForward('collection');
   }
@@ -103,11 +114,11 @@ export class ImagesPage implements OnInit {
       const takePhoto = async (): Promise<void> => {
         const photo = await Camera.getPhoto({
           quality: 90,
-          allowEditing: true,
-          resultType: CameraResultType.DataUrl,
+          allowEditing: false,
+          resultType: CameraResultType.Base64,
           source: CameraSource.Camera,
-        });
-        this.selectedImages?.push(photo.dataUrl);
+        })
+        this.selectedUncompressedImages?.push(photo.dataUrl);
         await takePhoto();
       };
       await takePhoto();
@@ -126,7 +137,7 @@ export class ImagesPage implements OnInit {
           allowEditing: false,
           resultType: CameraResultType.DataUrl,
         });
-        this.selectedImages?.push(image.dataUrl);
+        this.selectedUncompressedImages?.push(image.dataUrl);
       };
       takePicture();
     }
@@ -153,10 +164,8 @@ export class ImagesPage implements OnInit {
           .then((base64String) => {
             this.compressImage(base64String).then((str) => {
               console.log('compressed: ', str);
+              this.selectedImages?.push(str);
             });
-
-            console.log('original: ', base64String);
-            this.selectedImages?.push(`data:image/png;base64, ${base64String}`);
           })
           .catch((error) => {
             console.error('Error:', error);
@@ -189,6 +198,9 @@ export class ImagesPage implements OnInit {
 
   async compressImage(base64: string) {
     const img = new Image();
+    if(base64.includes('data:image/')){
+      base64 = base64.split(',')[1]
+    }
     img.src = `data:image/jpeg;base64, ${base64}`;
     const loading = new Promise((resolve, reject) => {
       img.onload = () => {
@@ -214,7 +226,6 @@ export class ImagesPage implements OnInit {
     let width = img.width;
     let height = img.height;
 
-    // calculate the width and height, constraining the proportions
     if (width > height) {
       if (width > maxWidth) {
         height = Math.round((height * maxWidth) / width);
