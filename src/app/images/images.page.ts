@@ -4,7 +4,12 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { HttpClient } from '@angular/common/http';
 import { Success } from '../models/success';
-import { AlertController, NavController, Platform, ToastController } from '@ionic/angular';
+import {
+  AlertController,
+  NavController,
+  Platform,
+  ToastController,
+} from '@ionic/angular';
 import { Capacitor } from '@capacitor/core';
 
 @Component({
@@ -13,7 +18,6 @@ import { Capacitor } from '@capacitor/core';
   styleUrls: ['./images.page.scss'],
 })
 export class ImagesPage implements OnInit {
-
   imageForm: FormGroup;
   selectedImages: any[] | undefined = [];
   isImageModalOpen: boolean = false;
@@ -25,7 +29,8 @@ export class ImagesPage implements OnInit {
   responsetime: any;
   timeDiff: any;
   showLoader: boolean = false;
-
+  MAX_WIDTH = 320;
+  MAX_HEIGHT = 180;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -41,10 +46,10 @@ export class ImagesPage implements OnInit {
     });
   }
 
-  ngOnInit() { }
+  ngOnInit() {}
 
-  ionViewWillEnter(){
-    this.selectedImages = this.imgUpl.getImages()
+  ionViewWillEnter() {
+    this.selectedImages = this.imgUpl.getImages();
   }
 
   async showToast(msg: string) {
@@ -57,60 +62,62 @@ export class ImagesPage implements OnInit {
   }
 
   async presentAlert(callback: () => void) {
-    const alert = await this.alertCtrl.create({
-      header: 'Alert',
-      subHeader: 'Do you want to take more pictures?',
-      buttons: [
-        {
-          text: 'No',
-        },
-        {
-          text: 'Yes!',
-          handler: () => {
-            callback()
-          }
-        }
-      ]
-    }).then(res => {
-      res.present();
-    });
+    const alert = await this.alertCtrl
+      .create({
+        header: 'Alert',
+        subHeader: 'Do you want to take more pictures?',
+        buttons: [
+          {
+            text: 'No',
+          },
+          {
+            text: 'Yes!',
+            handler: () => {
+              callback();
+            },
+          },
+        ],
+      })
+      .then((res) => {
+        res.present();
+      });
   }
 
   setOpen(val: boolean) {
-    this.normailzeView()
-    this.isImageModalOpen = val
+    this.normailzeView();
+    this.isImageModalOpen = val;
   }
 
   previewSubmit() {
-    if(!this.selectedImages || !this.selectedImages.length){
-      this.showToast('Please select some images before previewing.')
+    if (!this.selectedImages || !this.selectedImages.length) {
+      this.showToast('Please select some images before previewing.');
       return;
     }
-    this.imgUpl.setImages(this.selectedImages)
-    this.navCtrl.navigateForward('collection')
+    this.imgUpl.setImages(this.selectedImages);
+    this.navCtrl.navigateForward('collection');
   }
 
   async getImages() {
-    this.normailzeView()
+    this.normailzeView();
     if (Capacitor.isNativePlatform()) {
       const takePhoto = async (): Promise<void> => {
         const photo = await Camera.getPhoto({
           quality: 90,
           allowEditing: true,
           resultType: CameraResultType.DataUrl,
-          source: CameraSource.Camera
+          source: CameraSource.Camera,
         });
-        this.selectedImages?.push(photo.dataUrl)
+        this.selectedImages?.push(photo.dataUrl);
         await takePhoto();
       };
       await takePhoto();
     } else {
       const takePicture = async () => {
-        const perm = await Camera.checkPermissions()
+        const perm = await Camera.checkPermissions();
         if (!perm) {
-          const gotPerm = await Camera.requestPermissions()
+          const gotPerm = await Camera.requestPermissions();
           if (!gotPerm) {
-            this.showToast('Please allow permissions to access camera')
+            this.showToast('Please allow permissions to access camera');
             return;
           }
         }
@@ -119,20 +126,20 @@ export class ImagesPage implements OnInit {
           allowEditing: false,
           resultType: CameraResultType.DataUrl,
         });
-        this.selectedImages?.push(image.dataUrl)
+        this.selectedImages?.push(image.dataUrl);
       };
-      takePicture()
+      takePicture();
     }
   }
 
   pickImages() {
-    this.normailzeView()
+    this.normailzeView();
     const pickPicture = async () => {
-      const perm = await Camera.checkPermissions()
+      const perm = await Camera.checkPermissions();
       if (!perm) {
-        const gotPerm = await Camera.requestPermissions()
+        const gotPerm = await Camera.requestPermissions();
         if (!gotPerm) {
-          this.showToast('Please allow media permission for this feature')
+          this.showToast('Please allow media permission for this feature');
           return;
         }
       }
@@ -144,14 +151,19 @@ export class ImagesPage implements OnInit {
         let base64String = this.fetchContentFromURL(img.webPath)
           .then((blob) => this.blobToBase64(blob))
           .then((base64String) => {
-            this.selectedImages?.push(`data:image/png;base64, ${base64String}`)
+            this.compressImage(base64String).then((str) => {
+              console.log('compressed: ', str);
+            });
+
+            console.log('original: ', base64String);
+            this.selectedImages?.push(`data:image/png;base64, ${base64String}`);
           })
           .catch((error) => {
             console.error('Error:', error);
           });
-      })
+      });
     };
-    pickPicture()
+    pickPicture();
   }
 
   fetchContentFromURL(url: string): Promise<Blob | undefined> {
@@ -169,21 +181,63 @@ export class ImagesPage implements OnInit {
         }
       };
       if (!blob) {
-        return
+        return;
       }
       reader.readAsDataURL(blob);
     });
   }
 
-  normailzeView() {
-    this.uploadSucces = false
-    this.len = 0
+  async compressImage(base64: string) {
+    const img = new Image();
+    img.src = `data:image/jpeg;base64, ${base64}`;
+    const loading = new Promise((resolve, reject) => {
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const [newWidth, newHeight] = this.calculateSize(
+          img,
+          this.MAX_WIDTH,
+          this.MAX_HEIGHT
+        );
+        canvas.height = newHeight;
+        canvas.width = newWidth;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, newWidth, newHeight);
+        const str = canvas.toDataURL('image/jpeg', 0.7);
+        resolve(str);
+      };
+    });
+    const result = (await loading) as string;
+    return result;
   }
 
-  ionViewDidLeave(){
-    this.normailzeView()
-    this.selectedImages = []
-    this.showLoader = false
+  calculateSize(img: any, maxWidth: number, maxHeight: number) {
+    let width = img.width;
+    let height = img.height;
+
+    // calculate the width and height, constraining the proportions
+    if (width > height) {
+      if (width > maxWidth) {
+        height = Math.round((height * maxWidth) / width);
+        width = maxWidth;
+      }
+    } else {
+      if (height > maxHeight) {
+        width = Math.round((width * maxHeight) / height);
+        height = maxHeight;
+      }
+    }
+    return [width, height];
+  }
+
+  normailzeView() {
+    this.uploadSucces = false;
+    this.len = 0;
+  }
+
+  ionViewDidLeave() {
+    this.normailzeView();
+    this.selectedImages = [];
+    this.showLoader = false;
     this.isImageModalOpen = false;
     this.isPreviewModalOpen = false;
   }
