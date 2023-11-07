@@ -19,7 +19,7 @@ import { Capacitor } from '@capacitor/core';
 })
 export class ImagesPage {
   imageForm: FormGroup;
-  selectedImages: any[] = [];
+  selectedImages: any[] = this.imgUpl.getImages();
   selectedUncompressedImages: any[] = [];
   isImageModalOpen: boolean = false;
   isPreviewModalOpen: boolean = false;
@@ -89,7 +89,7 @@ export class ImagesPage {
   }
 
   async previewSubmit() {
-    if (this.selectedImages.length > 0 && this.selectedUncompressedImages.length > 0) {
+    if (this.selectedImages.length == 0 && this.selectedUncompressedImages.length == 0) {
       console.log(this.selectedUncompressedImages)
       this.showToast('Please select some images before previewing.');
       return;
@@ -98,6 +98,7 @@ export class ImagesPage {
     this.showLoaderOnPrev = true;
     for(let i=0; i < this.selectedUncompressedImages.length; i++){
       const img = await this.compressImage(this.selectedUncompressedImages[i])
+      console.log(this.selectedImages)
       this.selectedImages.push(img)
     }
     this.selectedUncompressedImages.forEach((data)=>{
@@ -105,6 +106,7 @@ export class ImagesPage {
     this.showLoaderOnPrev = false;
 
     this.imgUpl.setImages(this.selectedImages);
+    this.selectedImages = []
     this.navCtrl.navigateForward('collection');
   }
 
@@ -118,7 +120,7 @@ export class ImagesPage {
           resultType: CameraResultType.Base64,
           source: CameraSource.Camera,
         })
-        this.selectedUncompressedImages?.push(photo.dataUrl);
+        this.selectedUncompressedImages?.push(photo.base64String);
         await takePhoto();
       };
       await takePhoto();
